@@ -103,3 +103,8 @@ Prosimy o cierpliwość – procesy te wymagają sporej ilości zasobów i czasu
 5. Uruchom projekt: `streamlit run agent.py`
 
 Po tym projekt powinien działać poprawnie z mod
+
+
+## 🖼️ Przykład działania
+
+![Interfejs Streamlit z modelem Bielik](image.png)
