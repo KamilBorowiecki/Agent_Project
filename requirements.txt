@@ -1,0 +1,10 @@
+langchain
+langchain-google
+langchain-community
+langchain-google-genai
+langchain-core
+langchain-text-splitters
+langchain-chains
+langgraph
+langchain-openai
+ollama
