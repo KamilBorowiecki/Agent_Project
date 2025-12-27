@@ -51,7 +51,7 @@ W głównym katalogu projektu utwórz plik `.env` (jeśli jeszcze nie istnieje),
 
 ```env
 API_KEY="..."
-
+```
 ---
 
 ## 🤖 Pobranie i dodanie modelu Bielik
