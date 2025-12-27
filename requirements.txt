@@ -1,10 +1,13 @@
 langchain
-langchain-core
-langchain-community
 langchain-text-splitters
+langchain-core
 langchain-ollama
+langchain-community
 langchain-classic
-chromadb
+langchain-google-genai
 streamlit
+yfinance
+python-dotenv
+chromadb
 pypdf
 ollama
