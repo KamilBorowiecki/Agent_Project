@@ -36,17 +36,17 @@ pip install -r requirements.txt
 
 ---
 
-# 🔑 Konfiguracja klucza API
+## 🔑 Konfiguracja klucza API
 
 Aby aplikacja działała poprawnie, wymagany jest klucz API.
 
-## 1️⃣ Uzyskanie klucza API
+### Uzyskanie klucza API
 Klucz API możesz wygenerować pod tym adresem:  
 [https://aistudio.google.com/app/api-keys](https://aistudio.google.com/app/api-keys)
 
 Zaloguj się na konto Google i utwórz nowy klucz API.
 
-## 2️⃣ Dodanie klucza do pliku `.env`
+### Dodanie klucza do pliku `.env`
 W głównym katalogu projektu utwórz plik `.env` (jeśli jeszcze nie istnieje), a następnie dodaj do niego klucz w poniższej formie:
 
 ```env
