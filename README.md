@@ -126,3 +126,4 @@ Po tym projekt powinien działać poprawnie z mod
 ## 🖼️ Przykład działania
 
 ![Interfejs Streamlit z modelem Bielik](image.png)
+![Interfejs Streamlit z modelem Bielik](image2.png)
