@@ -6,6 +6,7 @@ from langchain_community.embeddings import OllamaEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_community.document_loaders import PyPDFLoader
+from langchain_core.messages import AIMessage
 from langchain_community.document_loaders import OnlinePDFLoader
 from langchain_classic.retrievers.multi_query import MultiQueryRetriever
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -52,14 +53,9 @@ def safe_api_call(func):
 @safe_api_call
 def call_bielik(prompt, question, vector_db):
     bielik_model = ChatOllama(
-        model="hf.co/speakleash/Bielik-4.5B-v3.0-Instruct-GGUF:Q8_0",
-        temperature=0.1
+            model="hf.co/speakleash/Bielik-4.5B-v3.0-Instruct-GGUF:Q8_0",
+            temperature=0.1
     )
-
-    bielik_model_with_tools = bielik_model.bind_tools([stock_price], 
-    tool_choice="stock_price"
-    )
-
 
     QUERY_PROMPT = PromptTemplate(
         input_variables=["question"],
@@ -80,10 +76,22 @@ def call_bielik(prompt, question, vector_db):
         print(e)
         retriever = None
 
-    final_template = """odpowiedz na pytanie bazujac na ponizszym kontekstu:
+    final_template = """<|system|>
+    Jesteś profesjonalnym asystentem finansowym. Twoim zadaniem jest odpowiadanie na pytania wyłącznie w oparciu o dostarczony kontekst. 
+
+    ZASADY:
+    1. Jeśli pytanie NIE dotyczy inwestowania lub rynków finansowych, odpowiedz krótko: "Przepraszam, ale odpowiadam tylko na pytania związane z inwestowaniem".
+    2. Jeśli pytanie dotyczy aktualnej ceny akcji (notowań giełdowych), odpowiedz: "Nie mam dostępu do danych giełdowych w czasie rzeczywistym, więc nie mogę podać aktualnej ceny".
+    3. Jeśli odpowiedź znajduje się w tekście, podaj ją i zacytuj pasujący fragment dokumentu.
+    4. Odpowiadaj zawsze w języku polskim.
+
+    KONTEKST:
     {context}
-    Jeśli pytanie dotyczy aktualnej ceny akcji, kursu giełdowego lub wartości rynkowej, MUSISZ użyć narzędzia 'stock_price'. Nie zgaduj.
-    Question: {question}
+
+    <|user|>
+    Pytanie: {question}
+
+    <|assistant|>
     """
 
 
@@ -92,14 +100,13 @@ def call_bielik(prompt, question, vector_db):
     chain = (
         {"context": retriever, "question": RunnablePassthrough()} 
         | chat_prompt
-        | bielik_model_with_tools
+        | bielik_model
+        | StrOutputParser()
     )
 
     response = chain.invoke({"question": question})
-    if response.tool_calls:
-        return response, "TOOL_CALL"
-    else:
-        return response.content, None
+        
+    return response, None
 
 
 @safe_api_call
@@ -109,9 +116,7 @@ def call_gemini(prompt, question, vector_db):
         temperature=0.1
     )
 
-    gemini_model_with_tools = gemini_model.bind_tools([stock_price], 
-    tool_choice="stock_price"
-    )
+    gemini_model_with_tools = gemini_model.bind_tools([stock_price])
 
     QUERY_PROMPT = PromptTemplate(
         input_variables=["question"],
@@ -132,11 +137,14 @@ def call_gemini(prompt, question, vector_db):
         print(e)
         retriever = None
 
-    final_template = """odpowiedz na pytanie bazujac na ponizszym kontekstu:
+    final_template = """Jesteś pomocnym asystentem. 
+    Odpowiedz na pytanie bazując na poniższym kontekście:
     {context}
-    Jeśli pytanie dotyczy aktualnej ceny akcji, kursu giełdowego lub wartości rynkowej, MUSISZ użyć narzędzia 'stock_price'. Nie zgaduj.
-    Question: {question}
-    """
+
+    Jeśli pytanie dotyczy ceny akcji, skorzystaj z dostępnego narzędzia.
+    W innym przypadku odpowiedz normalnie.
+
+    Pytanie: {question}"""
 
 
     chat_prompt = ChatPromptTemplate.from_template(final_template)
@@ -148,10 +156,30 @@ def call_gemini(prompt, question, vector_db):
     )
 
     response = chain.invoke({"question": question})
-    if response.tool_calls:
+
+    if hasattr(response, 'tool_calls') and response.tool_calls:
         return response, "TOOL_CALL"
-    else:
-        return response.content, None
+
+    if isinstance(response, AIMessage):
+        content = response.content
+        
+        if isinstance(content, list):
+            text_parts = []
+            for item in content:
+                if isinstance(item, dict) and 'text' in item:
+                    text_parts.append(item['text'])
+            return "".join(text_parts), None
+        
+        return str(content), None
+
+    if isinstance(response, list) and len(response) > 0:
+        item = response[0]
+        if isinstance(item, dict):
+            return item.get('text', str(item)), None
+        if hasattr(item, 'content'):
+            return item.content, None
+
+    return str(response), None
 
 @tool
 def stock_price(ticker: str) -> str:
