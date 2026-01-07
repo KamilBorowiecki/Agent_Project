@@ -82,7 +82,7 @@ def call_bielik(prompt, question, vector_db):
     ZASADY:
     1. Jeśli pytanie NIE dotyczy inwestowania lub rynków finansowych, odpowiedz krótko: "Przepraszam, ale odpowiadam tylko na pytania związane z inwestowaniem".
     2. Jeśli pytanie dotyczy aktualnej ceny akcji (notowań giełdowych), odpowiedz: "Nie mam dostępu do danych giełdowych w czasie rzeczywistym, więc nie mogę podać aktualnej ceny".
-    3. Jeśli odpowiedź znajduje się w tekście, podaj ją i zacytuj pasujący fragment dokumentu.
+    3. Jeśli odpowiedź znajduje się w dostarczonym KONTEKST, koniecznie podaj ją i zacytuj pasujący fragment dokumentu.
     4. Odpowiadaj zawsze w języku polskim.
 
     KONTEKST:
@@ -143,7 +143,7 @@ def call_gemini(prompt, question, vector_db):
     ZASADY:
     1. Jeśli pytanie NIE dotyczy inwestowania lub rynków finansowych, odpowiedz krótko: "Przepraszam, ale odpowiadam tylko na pytania związane z inwestowaniem".
     2. Jeśli pytanie dotyczy aktualnej ceny akcji (notowań giełdowych),skorzystaj z dostępnego toola".
-    3. Jeśli odpowiedź znajduje się w tekście, podaj ją i zacytuj pasujący fragment dokumentu.
+    3. Jeśli odpowiedź znajduje się w dostarczonym KONTEKST, koniecznie podaj ją i musisz zacytować pasujący fragment pochodzący z KONTEKST.
     4. Odpowiadaj zawsze w języku polskim.
 
     KONTEKST:
@@ -224,7 +224,7 @@ def run_streamlit():
     load_dotenv()
 
     st.set_page_config(page_title="LLM Compare", layout="wide")
-    st.title("🤖 Porównanie modeli LLM")
+    st.title("🤖 Asystent inwestora")
 
     vector_db = load_vector_db()
 
