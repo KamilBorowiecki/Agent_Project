@@ -137,14 +137,23 @@ def call_gemini(prompt, question, vector_db):
         print(e)
         retriever = None
 
-    final_template = """Jesteś pomocnym asystentem. 
-    Odpowiedz na pytanie bazując na poniższym kontekście:
+    final_template = """<|system|>
+    Jesteś profesjonalnym asystentem finansowym. Twoim zadaniem jest odpowiadanie na pytania wyłącznie w oparciu o dostarczony kontekst. 
+
+    ZASADY:
+    1. Jeśli pytanie NIE dotyczy inwestowania lub rynków finansowych, odpowiedz krótko: "Przepraszam, ale odpowiadam tylko na pytania związane z inwestowaniem".
+    2. Jeśli pytanie dotyczy aktualnej ceny akcji (notowań giełdowych),skorzystaj z dostępnego toola".
+    3. Jeśli odpowiedź znajduje się w tekście, podaj ją i zacytuj pasujący fragment dokumentu.
+    4. Odpowiadaj zawsze w języku polskim.
+
+    KONTEKST:
     {context}
 
-    Jeśli pytanie dotyczy ceny akcji, skorzystaj z dostępnego narzędzia.
-    W innym przypadku odpowiedz normalnie.
+    <|user|>
+    Pytanie: {question}
 
-    Pytanie: {question}"""
+    <|assistant|>
+    """
 
 
     chat_prompt = ChatPromptTemplate.from_template(final_template)
